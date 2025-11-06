@@ -1,0 +1,3 @@
+<manifest package="com.example.pokeapp" xmlns:android="http://schemas.android.com/apk/res/android">
+  <application android:label="PokeApp" android:theme="@style/Theme.PokeApp"/>
+</manifest>
