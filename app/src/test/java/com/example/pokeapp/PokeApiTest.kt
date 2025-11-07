@@ -5,27 +5,28 @@ import com.example.pokeapp.network.PokeApiService
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import io.strikt.api.expectThat
-import io.strikt.assertions.isEqualTo
+import kotlinx.coroutines.runBlocking
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 class PokeApiTest {
+
     private lateinit var server: MockWebServer
     private lateinit var service: PokeApiService
 
     @Before
     fun setup() {
-        server = MockWebServer()
-        server.start()
-        val retrofit = Retrofit.Builder()
-            .baseUrl(server.url("/")) // important
+        server = MockWebServer().apply { start() }
+
+        service = Retrofit.Builder()
+            .baseUrl(server.url("/"))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        service = retrofit.create(PokeApiService::class.java)
+            .create(PokeApiService::class.java)
     }
 
     @After
@@ -34,18 +35,25 @@ class PokeApiTest {
     }
 
     @Test
-    fun `get pokemon returns parsed object`() {
-        val json = """{
-          "name": "pikachu",
-          "height": 4,
-          "weight": 60
-        }"""
-        server.enqueue(MockResponse().setBody(json).setResponseCode(200))
+    fun getPokemon_returns_parsed_object() {
+        runBlocking {
+            val json = """
+                {
+                  "name": "pikachu",
+                  "height": 4,
+                  "weight": 60
+                }
+            """.trimIndent()
 
-        val pokemon = service.getPokemon("pikachu")
+            server.enqueue(MockResponse().setResponseCode(200).setBody(json))
 
-        expectThat(pokemon.name).isEqualTo("pikachu")
-        expectThat(pokemon.height).isEqualTo(4)
-        expectThat(pokemon.weight).isEqualTo(60)
+            // Asumo que getPokemon retorna Pokemon (no nullable)
+            val pokemon: Pokemon = service.getPokemon("pikachu")
+
+            // Aserciones simples (evito isNotNull porque pokemon es no-null)
+            expectThat(pokemon.name).isEqualTo("pikachu")
+            expectThat(pokemon.height).isEqualTo(4)
+            expectThat(pokemon.weight).isEqualTo(60)
+        }
     }
 }

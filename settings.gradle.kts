@@ -10,7 +10,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
-        mavenCentral()
+        mavenCentral() // ✅ Aquí se descarga Strikt
     }
 }
 
